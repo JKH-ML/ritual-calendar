@@ -1,0 +1,15 @@
+## Build outputs
+/WpfApp2/bin/
+/WpfApp2/obj/
+
+## VS/IDE user files
+*.user
+*.suo
+*.userprefs
+.vs/
+
+## Logs/cache
+*.log
+
+## Local secrets (not committed)
+WpfApp2/secrets.local.json

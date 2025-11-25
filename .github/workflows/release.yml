@@ -1,0 +1,60 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag name for the release (e.g. v0.1.0)'
+        required: true
+      create_release:
+        description: 'Create GitHub Release with artifact'
+        required: true
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET (10 preview)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Restore
+        run: dotnet restore WpfApp2/WpfApp2.csproj
+
+      - name: Build
+        run: dotnet build WpfApp2/WpfApp2.csproj -c Release -r win-x64 --no-self-contained --no-restore
+
+      - name: Publish
+        run: dotnet publish WpfApp2/WpfApp2.csproj -c Release -r win-x64 --no-self-contained --no-restore -o artifacts/publish
+
+      - name: Archive artifact
+        run: |
+          mkdir artifacts\release
+          Compress-Archive -Path artifacts/publish/* -DestinationPath artifacts/release/WpfApp2.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WpfApp2-${{ github.ref_name }}
+          path: artifacts/release/WpfApp2.zip
+
+      - name: Create release
+        if: ${{ inputs.create_release == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: ${{ inputs.release_tag }}
+          draft: false
+          prerelease: false
+          files: artifacts/release/WpfApp2.zip
