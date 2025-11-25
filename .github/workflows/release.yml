@@ -20,7 +20,6 @@ jobs:
       contents: write
     env:
       GH_RELEASE_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-    env:
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
