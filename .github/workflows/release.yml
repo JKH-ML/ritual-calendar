@@ -30,7 +30,7 @@ jobs:
           dotnet-quality: 'preview'
 
       - name: Restore
-        run: dotnet restore WpfApp2/WpfApp2.csproj
+        run: dotnet restore WpfApp2/WpfApp2.csproj -r win-x64
 
       - name: Build
         run: dotnet build WpfApp2/WpfApp2.csproj -c Release -r win-x64 --no-self-contained --no-restore
