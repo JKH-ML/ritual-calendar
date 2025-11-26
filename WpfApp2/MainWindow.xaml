@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:WpfApp2"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
-        Title="Shadcn Calendar (WebView2)"
+        Title="Routine Calendar"
         Height="768"
         Width="896"
         Background="#0b1220"
@@ -24,7 +24,7 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="6" />
+            <Setter Property="Padding" Value="2" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Cursor" Value="Hand" />
@@ -55,7 +55,7 @@
     </Window.Resources>
     <Grid Margin="12">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -83,29 +83,29 @@
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             VerticalAlignment="Center"
-                            Margin="0,0,6,0">
+                            Margin="0,0,2,0">
                 <Button x:Name="MinButton"
-                        Width="20"
-                        Height="20"
-                        Margin="0,0,10,0"
+                        Width="12"
+                        Height="12"
+                        Margin="0,0,8,0"
                         Style="{StaticResource TitleBarButtonStyle}"
                         Click="MinButton_Click">
                     <Image x:Name="MinIcon" Stretch="Uniform"/>
                 </Button>
                 <Button x:Name="MaxButton"
-                        Width="20"
-                        Height="20"
-                        Margin="0,0,10,0"
+                        Width="12"
+                        Height="12"
+                        Margin="0,0,8,0"
                         Style="{StaticResource TitleBarButtonStyle}"
                         Click="MaxButton_Click">
                     <Image x:Name="MaxIcon"
                            Stretch="Uniform"
-                           Width="12"
-                           Height="12"/>
+                           Width="6"
+                           Height="6"/>
                 </Button>
                 <Button x:Name="CloseButton"
-                        Width="20"
-                        Height="20"
+                        Width="12"
+                        Height="12"
                         Style="{StaticResource TitleBarCloseButtonStyle}"
                         Click="CloseButton_Click">
                     <Image x:Name="CloseIcon" Stretch="Uniform"/>
