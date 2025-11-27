@@ -27,6 +27,7 @@ const syncBtn = document.getElementById("syncBtn");
 const ritualBackdrop = document.getElementById("ritualBackdrop");
 const ritualClose = document.getElementById("ritualClose");
 const ritualButtons = () => Array.from(document.querySelectorAll(".ritual-btn"));
+const ritualDateText = document.getElementById("ritualDateText");
 
 // Ritual emoji snippets (from assets/animated-emojis.txt)
 const ritualEmojis = {
@@ -408,6 +409,9 @@ function ensureRangeForView() {
 
 function openRitualPicker(dateKey) {
   ritualState = { dateKey: dateKey || formatDateKey(new Date()) };
+  if (ritualDateText) {
+    ritualDateText.textContent = `${ritualState.dateKey} 에 리추얼 일정을 추가합니다.`;
+  }
   ritualBackdrop.classList.remove("hidden");
 }
 

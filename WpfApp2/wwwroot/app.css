@@ -585,4 +585,5 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   border-color: rgba(255, 255, 255, 0.25);
   background: rgba(255, 255, 255, 0.06);
 }
+.ritual-btn img { width: 28px; height: 28px; }
 .icon-white { filter: brightness(0) invert(1); }
