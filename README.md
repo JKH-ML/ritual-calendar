@@ -27,5 +27,9 @@ If all three land on the same date, the calendar lights up to celebrate the fini
 ![WPF](https://img.shields.io/badge/WPF-0b1220?style=flat&logo=windows&logoColor=white)
 ![WebView2](https://img.shields.io/badge/WebView2-0f9d58?style=flat&logo=microsoft-edge&logoColor=white)
 ![Google Calendar API](https://img.shields.io/badge/Google%20Calendar%20API-4285F4?style=flat&logo=googlecalendar&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-239120?style=flat&logo=c-sharp&logoColor=white)
+![HTML](https://img.shields.io/badge/HTML5-e34f26?style=flat&logo=html5&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-f7df1e?style=flat&logo=javascript&logoColor=222)
 
 _Still in active development — thanks for your patience!_
