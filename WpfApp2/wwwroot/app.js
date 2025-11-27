@@ -337,7 +337,7 @@ function renderCalendar() {
         const count = generalEvents.length;
         const dots = count === 1
           ? `<span class="dot-general"></span>`
-          : `<span class="dot-general"></span><span class="dot-general more">+${count - 1}</span>`;
+          : `<span class="dot-general"></span><span class="dot-general plus" title="+${count - 1}"></span>`;
         generalDots = `<div class="general-dots">${dots}</div>`;
       }
 
