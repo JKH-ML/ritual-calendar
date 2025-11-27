@@ -335,9 +335,9 @@ function renderCalendar() {
       let generalDots = "";
       if (generalEvents.length) {
         const count = generalEvents.length;
-        const dots = count <= 3
-          ? Array.from({ length: count }).map(() => `<span class="dot-general"></span>`).join("")
-          : `${Array.from({ length: 3 }).map(() => `<span class="dot-general"></span>`).join("")}<span class="dot-general more">+${count - 3}</span>`;
+        const dots = count === 1
+          ? `<span class="dot-general"></span>`
+          : `<span class="dot-general"></span><span class="dot-general more">+${count - 1}</span>`;
         generalDots = `<div class="general-dots">${dots}</div>`;
       }
 
