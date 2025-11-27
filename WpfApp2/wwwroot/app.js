@@ -337,7 +337,8 @@ function renderCalendar() {
       if (generalEvents.length) {
         const count = generalEvents.length;
         if (count > 1) {
-          generalLabelTop = `<span class="general-count" title="${count} events">+${count}</span>`;
+          const extra = count - 1;
+          generalLabelTop = `<span class="general-count" title="${count} events">+${extra}</span>`;
         }
         const firstTitle = generalEvents[0].title || "Event";
         generalList = `<div class="general-list" title="${firstTitle}">${firstTitle}</div>`;
