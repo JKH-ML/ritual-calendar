@@ -315,15 +315,13 @@ function renderCalendar() {
     .map(cell => {
       const key = formatDateKey(cell.date);
       const dayEvents = events[key] || [];
+      const ritualEvents = dayEvents.filter(evt => getRitualEmoji(evt.title));
+      const generalEvents = dayEvents.filter(evt => !getRitualEmoji(evt.title));
       const isToday = key === todayKey;
       const isSelected = state.selected && formatDateKey(state.selected) === key;
-      const hasEvents = dayEvents.length > 0;
+      const hasEvents = ritualEvents.length > 0 || generalEvents.length > 0;
       const isFirst = cell.date.getDate() === 1;
-      const ritualSet = new Set(
-        dayEvents
-          .map(evt => getRitualEmoji(evt.title)?.emoji)
-          .filter(Boolean)
-      );
+      const ritualSet = new Set(ritualEvents.map(evt => getRitualEmoji(evt.title)?.emoji).filter(Boolean));
       const ritualCount = ritualSet.size;
       const hasRitualTrio = ["✏️", "🔥", "🚀"].every(r => ritualSet.has(r));
       const ritualClass = hasRitualTrio
@@ -334,8 +332,17 @@ function renderCalendar() {
             ? "silver"
             : "";
       let badges = "";
-      if (hasEvents) {
-        const dots = dayEvents
+      let generalDots = "";
+      if (generalEvents.length) {
+        const count = generalEvents.length;
+        const dots = count <= 3
+          ? Array.from({ length: count }).map(() => `<span class="dot-general"></span>`).join("")
+          : `${Array.from({ length: 3 }).map(() => `<span class="dot-general"></span>`).join("")}<span class="dot-general more">+${count - 3}</span>`;
+        generalDots = `<div class="general-dots">${dots}</div>`;
+      }
+
+      if (ritualEvents.length) {
+        const dots = ritualEvents
           .map(evt => {
             const ritual = getRitualEmoji(evt.title);
             if (ritual) {
@@ -348,7 +355,10 @@ function renderCalendar() {
       }
       return `
         <div class="day ${cell.outside ? "outside" : ""} ${isToday ? "today" : ""} ${isSelected ? "selected" : ""} ${isFirst ? "first-of-month" : ""} ${ritualClass}" data-date="${key}">
-          <div class="day-number">${cell.date.getDate()}</div>
+          <div class="day-header">
+            <div class="day-number">${cell.date.getDate()}</div>
+            ${generalDots}
+          </div>
           ${badges}
         </div>`;
     })
