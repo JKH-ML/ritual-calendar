@@ -10,7 +10,7 @@ A calendar layered on top of Google Calendar with a “routine” experience. Ta
 - **Smooth flow**: Move months, jump to today, sync, add/edit/delete events in one place.
 
 ## Quick Examples
-- `#✏️ Morning writing`
+- `#✏️ Learning`
 - `#🔥 Workout`
 - `#🚀 Side project`
 
@@ -21,3 +21,11 @@ If all three land on the same date, the calendar lights up to celebrate the fini
 ## Open Source & Releases
 - The project is open source.
 - GitHub Actions builds and publishes releases; grab the latest executable from the releases page.
+
+## Stack
+![.NET](https://img.shields.io/badge/.NET-512BD4?style=flat&logo=dotnet&logoColor=white)
+![WPF](https://img.shields.io/badge/WPF-0b1220?style=flat&logo=windows&logoColor=white)
+![WebView2](https://img.shields.io/badge/WebView2-0f9d58?style=flat&logo=microsoft-edge&logoColor=white)
+![Google Calendar API](https://img.shields.io/badge/Google%20Calendar%20API-4285F4?style=flat&logo=googlecalendar&logoColor=white)
+
+_Still in active development — thanks for your patience!_
