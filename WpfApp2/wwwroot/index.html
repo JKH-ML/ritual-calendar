@@ -128,22 +128,29 @@
   <div id="ritualBackdrop" class="modal-backdrop hidden">
     <div class="modal-card ritual-card">
       <div class="modal-header">
-        <div class="modal-title">리추얼을 선택하세요</div>
+        <div class="modal-title">추가할 일정을 선택하세요</div>
         <button class="icon-btn" id="ritualClose" aria-label="Close">
           <img src="./assets/x.png" class="icon" alt="Close" />
         </button>
       </div>
       <div class="modal-body ritual-body">
-        <p class="kpi-sub" id="ritualDateText">yyyy-mm-dd 에 리추얼 일정을 추가합니다.</p>
+        <p class="kpi-sub" id="ritualDateText">yyyy-mm-dd(요일) 에 일정을 추가합니다.</p>
         <div class="ritual-options">
-          <button class="ritual-btn" data-ritual="✏️">
-            <img src="./assets/pencil.png" class="icon icon-white" alt="pencil" />
+          <button class="ritual-btn pick-btn" data-kind="general">
+            <img src="./assets/calendar-plus.png" class="icon icon-white" alt="일반 일정" />
+            <span class="option-label">일반 일정</span>
           </button>
-          <button class="ritual-btn" data-ritual="🔥">
-            <img src="./assets/flame.png" class="icon icon-white" alt="flame" />
+          <button class="ritual-btn pick-btn" data-ritual="✏️">
+            <img src="./assets/pencil.png" class="icon icon-white" alt="Record" />
+            <span class="option-label">Record</span>
           </button>
-          <button class="ritual-btn" data-ritual="🚀">
-            <img src="./assets/rocket.png" class="icon icon-white" alt="rocket" />
+          <button class="ritual-btn pick-btn" data-ritual="🔥">
+            <img src="./assets/flame.png" class="icon icon-white" alt="Workout" />
+            <span class="option-label">Workout</span>
+          </button>
+          <button class="ritual-btn pick-btn" data-ritual="🚀">
+            <img src="./assets/rocket.png" class="icon icon-white" alt="Project" />
+            <span class="option-label">Project</span>
           </button>
         </div>
       </div>

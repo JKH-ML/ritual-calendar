@@ -670,7 +670,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .ritual-body { display: flex; flex-direction: column; gap: 14px; }
 .ritual-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 10px;
 }
 .ritual-btn {
@@ -693,6 +693,15 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 .ritual-btn img { width: 28px; height: 28px; }
 .icon-white { filter: brightness(0) invert(1); }
+.pick-btn {
+  flex-direction: column;
+  gap: 6px;
+}
+.option-label {
+  font-size: 11px;
+  color: #cbd5ff;
+  white-space: nowrap;
+}
 
 .context-menu {
   /* repurposed as modal container; styling handled by modal-backdrop/card */

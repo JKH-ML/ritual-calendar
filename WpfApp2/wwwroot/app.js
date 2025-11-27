@@ -26,7 +26,7 @@ const inputReminder = document.getElementById("inputReminder");
 const syncBtn = document.getElementById("syncBtn");
 const ritualBackdrop = document.getElementById("ritualBackdrop");
 const ritualClose = document.getElementById("ritualClose");
-const ritualButtons = () => Array.from(document.querySelectorAll(".ritual-btn"));
+const ritualButtons = () => Array.from(document.querySelectorAll(".pick-btn"));
 const ritualDateText = document.getElementById("ritualDateText");
 const dayContextMenu = document.getElementById("dayContextMenu");
 const contextItems = () => Array.from(document.querySelectorAll(".context-item"));
@@ -451,7 +451,7 @@ function openRitualPicker(dateKey) {
     const parsed = parseDateKey(ritualState.dateKey);
     const weekdayNamesLocal = ["일", "월", "화", "수", "목", "금", "토"];
     const weekday = weekdayNamesLocal[parsed.getDay()];
-    ritualDateText.textContent = `${ritualState.dateKey}(${weekday}) 에 리추얼 일정을 추가합니다.`;
+    ritualDateText.textContent = `${ritualState.dateKey}(${weekday}) 에 일정을 추가합니다.`;
   }
   ritualBackdrop.classList.remove("hidden");
 }
@@ -560,6 +560,13 @@ ritualClose.addEventListener("click", closeRitualPicker);
 ritualButtons().forEach(btn => {
   btn.addEventListener("click", () => {
     const emoji = btn.getAttribute("data-ritual");
+    const kind = btn.getAttribute("data-kind");
+    const dateKey = ritualState.dateKey || formatDateKey(new Date());
+    if (kind === "general") {
+      closeRitualPicker();
+      openEventModal({ mode: "create", dateKey });
+      return;
+    }
     if (!emoji) return;
     createRitualEvent(emoji);
   });
