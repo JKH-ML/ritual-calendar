@@ -10,7 +10,7 @@
   <div class="shell">
     <div class="card calendar">
       <div class="month-header">
-        <button class="menu-button" aria-label="Menu">
+        <button id="menuBtn" class="menu-button" aria-label="Menu">
           <img src="./assets/menu.png" class="icon" alt="Menu" />
         </button>
 
@@ -25,10 +25,10 @@
         </div>
 
         <div class="header-actions">
-          <button id="syncBtn" class="ghost" title="동기화">
-            <img src="./assets/calendar-sync.png" class="icon icon-invert" alt="Sync" />
-          </button>
-          <button id="todayBtn" class="ghost">Today</button>
+        <button id="syncBtn" class="ghost" title="Sync">
+          <img src="./assets/calendar-sync.png" class="icon icon-invert" alt="Sync" />
+        </button>
+        <button id="todayBtn" class="ghost">Today</button>
           <button id="newEvent" class="primary">
             <span class="icon-text">
               <img src="./assets/calendar-plus.png" class="icon" alt="Add" />
@@ -42,8 +42,46 @@
     </div>
 
     <div class="card">
-      <p class="panel-title" id="sidebarTitle">일정</p>
+      <p class="panel-title" id="sidebarTitle">Events</p>
       <div id="eventList" class="event-list"></div>
+    </div>
+  </div>
+
+  <!-- Settings panel -->
+  <div id="settingsBackdrop" class="modal-backdrop hidden">
+    <div class="modal-card settings-card">
+      <div class="modal-header">
+        <div class="modal-title" id="settingsTitle">Settings</div>
+        <button class="icon-btn" id="settingsClose" aria-label="Close">
+          <img src="./assets/x.png" class="icon" alt="Close" />
+        </button>
+      </div>
+      <div class="settings-body">
+        <label class="settings-row">
+          <div>
+            <div class="settings-label" id="settingsHolidayLabel">Show holidays</div>
+            <div class="settings-help" id="settingsHolidayHelp">Show Google holidays on the calendar.</div>
+          </div>
+          <input type="checkbox" id="toggleHoliday" />
+        </label>
+        <label class="settings-row">
+          <div>
+            <div class="settings-label" id="settingsPriorityLabel">Holiday priority</div>
+            <div class="settings-help" id="settingsPriorityHelp">Show holiday title first when mixed with general events.</div>
+          </div>
+          <input type="checkbox" id="toggleHolidayPriority" />
+        </label>
+        <label class="settings-row">
+          <div>
+            <div class="settings-label" id="settingsLanguageLabel">Language</div>
+            <div class="settings-help" id="settingsLanguageHelp">Switch calendar language.</div>
+          </div>
+          <select id="languageSelect" class="settings-select">
+            <option value="en">English</option>
+            <option value="ko">Korean</option>
+          </select>
+        </label>
+      </div>
     </div>
   </div>
 
@@ -51,7 +89,7 @@
   <div id="modalBackdrop" class="modal-backdrop hidden">
     <div id="modalEvent" class="modal-card">
       <div class="modal-header">
-        <div class="modal-title" id="modalTitle">일정 추가</div>
+        <div class="modal-title" id="modalTitle">Add Event</div>
         <button class="icon-btn" id="modalClose" aria-label="Close">
           <img src="./assets/x.png" class="icon" alt="Close" />
         </button>
@@ -59,57 +97,57 @@
       <form id="modalForm" class="modal-form">
         <input type="hidden" id="inputEventId" />
         <label>
-          <div class="kpi-sub">제목</div>
-          <input id="inputTitle" class="input" type="text" required placeholder="제목을 입력하세요" />
+          <div class="kpi-sub" id="lblTitle">Title</div>
+          <input id="inputTitle" class="input" type="text" required placeholder="Enter a title" />
         </label>
         <label>
-          <div class="kpi-sub" style="display:flex; align-items:center; gap:6px;">
+          <div class="kpi-sub" id="lblStart" style="display:flex; align-items:center; gap:6px;">
             <img src="./assets/calendar-days.png" class="icon" alt="date" />
-            <span>시작</span>
+            <span>Start</span>
           </div>
           <div style="display:flex; gap:8px;">
             <input id="inputStartDate" class="input" style="flex:1;" type="date" />
-            <input id="inputTime" class="input" style="width:120px;" type="text" placeholder="예: 08:00" />
+            <input id="inputTime" class="input" style="width:120px;" type="text" placeholder="e.g. 08:00" />
           </div>
         </label>
         <label>
-          <div class="kpi-sub" style="display:flex; align-items:center; gap:6px;">
+          <div class="kpi-sub" id="lblEnd" style="display:flex; align-items:center; gap:6px;">
             <img src="./assets/calendar-days.png" class="icon" alt="date" />
-            <span>종료</span>
+            <span>End</span>
           </div>
           <div style="display:flex; gap:8px;">
             <input id="inputEndDate" class="input" style="flex:1;" type="date" />
-            <input id="inputEndTime" class="input" style="width:120px;" type="text" placeholder="예: 09:00" />
+            <input id="inputEndTime" class="input" style="width:120px;" type="text" placeholder="e.g. 09:00" />
           </div>
         </label>
         <label style="display:flex; align-items:center; gap:8px;">
           <input id="inputAllDay" type="checkbox" />
-          <span class="kpi-sub">하루종일</span>
+          <span class="kpi-sub" id="lblAllDay">All day</span>
         </label>
         <label>
-          <div class="kpi-sub" style="display:flex; align-items:center; gap:6px;">
+          <div class="kpi-sub" id="lblLocation" style="display:flex; align-items:center; gap:6px;">
             <img src="./assets/map-pin.png" class="icon" alt="location" />
-            <span>위치</span>
+            <span>Location</span>
           </div>
-          <input id="inputLocation" class="input" type="text" placeholder="장소를 입력하세요" />
+          <input id="inputLocation" class="input" type="text" placeholder="Enter a location" />
         </label>
         <label>
-          <div class="kpi-sub" style="display:flex; align-items:center; gap:6px;">
+          <div class="kpi-sub" id="lblReminder" style="display:flex; align-items:center; gap:6px;">
             <img src="./assets/bell.png" class="icon" alt="reminder" />
-            <span>알림 (분)</span>
+            <span>Reminder (minutes)</span>
           </div>
-          <input id="inputReminder" class="input" type="number" min="0" step="5" placeholder="예: 30 (분 전)" />
+          <input id="inputReminder" class="input" type="number" min="0" step="5" placeholder="e.g. 30 (minutes before)" />
         </label>
         <div class="modal-footer">
-          <button type="button" class="btn-secondary" id="modalCancel">취소</button>
-          <button type="submit" class="btn-primary" id="modalSubmit">저장</button>
+          <button type="button" class="btn-secondary" id="modalCancel">Cancel</button>
+          <button type="submit" class="btn-primary" id="modalSubmit">Save</button>
         </div>
       </form>
     </div>
 
     <div id="modalDelete" class="modal-card hidden">
       <div class="modal-header">
-        <div class="modal-title">일정 삭제</div>
+        <div class="modal-title" id="deleteTitle">Delete Event</div>
         <button class="icon-btn" id="deleteClose" aria-label="Close">
           <img src="./assets/x.png" class="icon" alt="Close" />
         </button>
@@ -118,8 +156,8 @@
         <p id="deleteText"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-secondary" id="deleteCancel">취소</button>
-        <button type="button" class="btn-primary" id="deleteConfirm">삭제</button>
+        <button type="button" class="btn-secondary" id="deleteCancel">Cancel</button>
+        <button type="button" class="btn-primary" id="deleteConfirm">Delete</button>
       </div>
     </div>
   </div>
@@ -128,29 +166,29 @@
   <div id="ritualBackdrop" class="modal-backdrop hidden">
     <div class="modal-card ritual-card">
       <div class="modal-header">
-        <div class="modal-title">추가할 일정을 선택하세요</div>
+        <div class="modal-title" id="ritualTitle">Pick an event to add</div>
         <button class="icon-btn" id="ritualClose" aria-label="Close">
           <img src="./assets/x.png" class="icon" alt="Close" />
         </button>
       </div>
       <div class="modal-body ritual-body">
-        <p class="kpi-sub" id="ritualDateText">yyyy-mm-dd(요일) 에 일정을 추가합니다.</p>
+        <p class="kpi-sub" id="ritualDateText">Pick a date to add an event.</p>
         <div class="ritual-options">
           <button class="ritual-btn pick-btn" data-kind="general">
-            <img src="./assets/calendar-plus.png" class="icon icon-white" alt="일반 일정" />
-            <span class="option-label">일반 일정</span>
+            <img src="./assets/calendar-plus.png" class="icon icon-white" alt="General event" />
+            <span class="option-label" id="ritualGeneralLabel">General</span>
           </button>
           <button class="ritual-btn pick-btn" data-ritual="✏️">
             <img src="./assets/pencil.png" class="icon icon-white" alt="Record" />
-            <span class="option-label">Record</span>
+            <span class="option-label" id="ritualRecordLabel">Record</span>
           </button>
           <button class="ritual-btn pick-btn" data-ritual="🔥">
             <img src="./assets/flame.png" class="icon icon-white" alt="Workout" />
-            <span class="option-label">Workout</span>
+            <span class="option-label" id="ritualWorkoutLabel">Workout</span>
           </button>
           <button class="ritual-btn pick-btn" data-ritual="🚀">
             <img src="./assets/rocket.png" class="icon icon-white" alt="Project" />
-            <span class="option-label">Project</span>
+            <span class="option-label" id="ritualProjectLabel">Project</span>
           </button>
         </div>
       </div>
@@ -161,16 +199,16 @@
   <div id="dayContextMenu" class="modal-backdrop hidden">
     <div class="modal-card ritual-card context-card">
       <div class="modal-header">
-        <div class="modal-title" id="contextDateLabel">선택된 날짜</div>
+        <div class="modal-title" id="contextDateLabel">Selected date</div>
         <button class="icon-btn" id="contextClose" aria-label="Close">
           <img src="./assets/x.png" class="icon" alt="Close" />
         </button>
       </div>
       <div class="modal-body ritual-body">
         <div class="context-actions">
-          <button class="context-item" data-action="clear-general">일반 일정 지우기</button>
-          <button class="context-item" data-action="clear-ritual">리추얼 일정 지우기</button>
-          <button class="context-item" data-action="clear-all">모든 일정 지우기</button>
+          <button class="context-item" data-action="clear-general" id="ctxClearGeneral">Clear general events</button>
+          <button class="context-item" data-action="clear-ritual" id="ctxClearRitual">Clear ritual events</button>
+          <button class="context-item" data-action="clear-all" id="ctxClearAll">Clear all events</button>
         </div>
       </div>
     </div>

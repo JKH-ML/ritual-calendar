@@ -25,6 +25,22 @@ namespace WpfApp2
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly string _prefsPath;
+        private const string HolidayCalendarId = "ko.south_korea#holiday@group.v.calendar.google.com";
+        private static readonly HashSet<string> HolidayExclusions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            // 일반적으로 쉬지 않는 기념일/문화일
+            "제헌절",
+            "스승의날",
+            "어버이날",
+            "성년의 날",
+            "성년의날",
+            "식목일",
+            "국군의날",
+            "크리스마스 이브",
+            "크리스마스이브",
+            "섣달 그믐날",
+            "노동절"
+        };
         private const double DefaultWidth = 896;
         private const double DefaultHeight = 768;
         private const double DefaultLeft = 1024;
@@ -124,86 +140,22 @@ namespace WpfApp2
             if (service == null)
                 return;
 
+            var start = timeMinOverride ?? _loadedStart;
+
             try
             {
-                var request = service.Events.List("primary");
-                var start = timeMinOverride ?? _loadedStart;
-                request.TimeMinDateTimeOffset = start;
-                request.SingleEvents = true;
-                request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
-                request.MaxResults = 250;
-
-                // Page through all results so going further back does not drop recent items due to API paging.
-                var allItems = new System.Collections.Generic.List<Event>();
-                Events events;
-                do
-                {
-                    events = await request.ExecuteAsync();
-                    if (events.Items != null)
-                        allItems.AddRange(events.Items);
-                    request.PageToken = events.NextPageToken;
-                } while (!string.IsNullOrEmpty(request.PageToken));
+                var primaryTask = FetchNormalizedEventsAsync(service, "primary", start, false);
+                var holidayTask = FetchNormalizedEventsAsync(service, HolidayCalendarId, start, true);
+                await Task.WhenAll(primaryTask, holidayTask);
 
                 _loadedStart = start;
 
-                var normalized = allItems
-                    .Where(e => e.Start != null)
-                    .Select(e =>
-                    {
-                        var allDay = e.Start.Date != null;
-                        var startDateKey = e.Start.Date ?? e.Start.DateTime?.ToLocalTime().ToString("yyyy-MM-dd");
-                        if (startDateKey == null) return null;
-
-                        var endRaw = e.End?.Date ?? e.End?.DateTime?.ToLocalTime().ToString("yyyy-MM-dd") ?? startDateKey;
-                        string endDateKey;
-                        string? startTime = null;
-                        string? endTime = null;
-                        var location = e.Location ?? string.Empty;
-                        int? reminderMinutes = null;
-
-                        if (allDay)
-                        {
-                            var endParsed = DateTime.Parse(endRaw, CultureInfo.InvariantCulture);
-                            endParsed = endParsed.AddDays(-1); // Google all-day end is exclusive
-                            if (endParsed < DateTime.Parse(startDateKey, CultureInfo.InvariantCulture))
-                                endParsed = DateTime.Parse(startDateKey, CultureInfo.InvariantCulture);
-                            endDateKey = endParsed.ToString("yyyy-MM-dd");
-                        }
-                        else
-                        {
-                            endDateKey = endRaw;
-                            startTime = e.Start.DateTime?.ToLocalTime().ToString("HH:mm");
-                            endTime = e.End?.DateTime?.ToLocalTime().ToString("HH:mm");
-                            if (e.Reminders?.Overrides != null && e.Reminders.Overrides.Count > 0)
-                            {
-                                var first = e.Reminders.Overrides.FirstOrDefault(r => r.Method == "popup");
-                                if (first?.Minutes != null)
-                                {
-                                    reminderMinutes = first.Minutes;
-                                }
-                            }
-                        }
-
-                        return new
-                        {
-                            id = e.Id,
-                            title = e.Summary ?? "(no title)",
-                            startDateKey,
-                            endDateKey,
-                            startTime,
-                            endTime,
-                            allDay,
-                            location,
-                            reminderMinutes
-                        };
-                    })
-                    .Where(e => e != null)
-                    .ToArray();
+                var combined = primaryTask.Result.Concat(holidayTask.Result).ToArray();
 
                 if (CalendarView.CoreWebView2 == null)
                     return;
 
-                var payload = JsonSerializer.Serialize(new { kind = "events", items = normalized });
+                var payload = JsonSerializer.Serialize(new { kind = "events", items = combined });
                 CalendarView.CoreWebView2.PostWebMessageAsJson(payload);
             }
             catch (Exception ex)
@@ -513,6 +465,105 @@ namespace WpfApp2
             }
 
             return (clientId, clientSecret);
+        }
+
+        private async Task<List<NormalizedEvent>> FetchNormalizedEventsAsync(CalendarService service, string calendarId, DateTimeOffset start, bool isHoliday)
+        {
+            var request = service.Events.List(calendarId);
+            request.TimeMinDateTimeOffset = start;
+            request.SingleEvents = true;
+            request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
+            request.MaxResults = 250;
+
+            var allItems = new List<Event>();
+            Events events;
+            do
+            {
+                events = await request.ExecuteAsync();
+                if (events.Items != null)
+                    allItems.AddRange(events.Items);
+                request.PageToken = events.NextPageToken;
+            } while (!string.IsNullOrEmpty(request.PageToken));
+
+            return allItems
+                .Where(e => e.Start != null)
+                .Select(e =>
+                {
+                    var allDay = e.Start.Date != null;
+                    var startOffset = e.Start.DateTimeDateTimeOffset?.ToLocalTime();
+                    var startDateKey = e.Start.Date ?? startOffset?.ToString("yyyy-MM-dd");
+                    if (startDateKey == null) return null;
+
+                    var endOffset = e.End?.DateTimeDateTimeOffset?.ToLocalTime();
+                    var endRaw = e.End?.Date ?? endOffset?.ToString("yyyy-MM-dd") ?? startDateKey;
+                    string endDateKey;
+                    string? startTime = null;
+                    string? endTime = null;
+                    var location = e.Location ?? string.Empty;
+                    int? reminderMinutes = null;
+
+                    if (allDay)
+                    {
+                        var endParsed = DateTime.Parse(endRaw, CultureInfo.InvariantCulture);
+                        endParsed = endParsed.AddDays(-1); // Google all-day end is exclusive
+                        if (endParsed < DateTime.Parse(startDateKey, CultureInfo.InvariantCulture))
+                            endParsed = DateTime.Parse(startDateKey, CultureInfo.InvariantCulture);
+                        endDateKey = endParsed.ToString("yyyy-MM-dd");
+                    }
+                    else
+                    {
+                        endDateKey = endRaw;
+                        startTime = startOffset?.ToString("HH:mm");
+                        endTime = endOffset?.ToString("HH:mm");
+                        if (e.Reminders?.Overrides != null && e.Reminders.Overrides.Count > 0)
+                        {
+                            var first = e.Reminders.Overrides.FirstOrDefault(r => r.Method == "popup");
+                            if (first?.Minutes != null)
+                            {
+                                reminderMinutes = first.Minutes;
+                            }
+                        }
+                    }
+
+                    return new NormalizedEvent
+                    {
+                        id = e.Id,
+                        title = e.Summary ?? "(no title)",
+                        startDateKey = startDateKey,
+                        endDateKey = endDateKey,
+                        startTime = startTime,
+                        endTime = endTime,
+                        allDay = allDay,
+                        location = location,
+                        reminderMinutes = reminderMinutes,
+                        isHoliday = isHoliday && !IsExcludedHoliday(e.Summary),
+                        calendarId = calendarId
+                    };
+                })
+                .Where(e => e != null)
+                .ToList()!;
+        }
+
+        private static bool IsExcludedHoliday(string? title)
+        {
+            if (string.IsNullOrWhiteSpace(title)) return false;
+            var trimmed = title.Trim();
+            return HolidayExclusions.Contains(trimmed);
+        }
+
+        private class NormalizedEvent
+        {
+            public string? id { get; set; }
+            public string? title { get; set; }
+            public string? startDateKey { get; set; }
+            public string? endDateKey { get; set; }
+            public string? startTime { get; set; }
+            public string? endTime { get; set; }
+            public bool allDay { get; set; }
+            public string? location { get; set; }
+            public int? reminderMinutes { get; set; }
+            public bool isHoliday { get; set; }
+            public string? calendarId { get; set; }
         }
 
         private class WindowPrefs

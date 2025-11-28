@@ -8,6 +8,12 @@ const modalEvent = document.getElementById("modalEvent");
 const modalDelete = document.getElementById("modalDelete");
 const modalTitleEl = document.getElementById("modalTitle");
 const modalForm = document.getElementById("modalForm");
+const lblTitle = document.getElementById("lblTitle");
+const lblStart = document.getElementById("lblStart");
+const lblEnd = document.getElementById("lblEnd");
+const lblAllDay = document.getElementById("lblAllDay");
+const lblLocation = document.getElementById("lblLocation");
+const lblReminder = document.getElementById("lblReminder");
 const inputEventId = document.getElementById("inputEventId");
 const inputStartDate = document.getElementById("inputStartDate");
 const inputEndDate = document.getElementById("inputEndDate");
@@ -23,8 +29,10 @@ const deleteConfirm = document.getElementById("deleteConfirm");
 const deleteText = document.getElementById("deleteText");
 const inputLocation = document.getElementById("inputLocation");
 const inputReminder = document.getElementById("inputReminder");
+const deleteTitleEl = document.getElementById("deleteTitle");
 const syncBtn = document.getElementById("syncBtn");
 const ritualBackdrop = document.getElementById("ritualBackdrop");
+const ritualTitle = document.getElementById("ritualTitle");
 const ritualClose = document.getElementById("ritualClose");
 const ritualButtons = () => Array.from(document.querySelectorAll(".pick-btn"));
 const ritualDateText = document.getElementById("ritualDateText");
@@ -32,6 +40,26 @@ const dayContextMenu = document.getElementById("dayContextMenu");
 const contextItems = () => Array.from(document.querySelectorAll(".context-item"));
 const contextDateLabel = document.getElementById("contextDateLabel");
 const contextClose = document.getElementById("contextClose");
+const ctxClearGeneral = document.getElementById("ctxClearGeneral");
+const ctxClearRitual = document.getElementById("ctxClearRitual");
+const ctxClearAll = document.getElementById("ctxClearAll");
+const menuBtn = document.getElementById("menuBtn");
+const settingsBackdrop = document.getElementById("settingsBackdrop");
+const settingsClose = document.getElementById("settingsClose");
+const toggleHoliday = document.getElementById("toggleHoliday");
+const toggleHolidayPriority = document.getElementById("toggleHolidayPriority");
+const languageSelect = document.getElementById("languageSelect");
+const settingsHolidayLabel = document.getElementById("settingsHolidayLabel");
+const settingsHolidayHelp = document.getElementById("settingsHolidayHelp");
+const settingsPriorityLabel = document.getElementById("settingsPriorityLabel");
+const settingsPriorityHelp = document.getElementById("settingsPriorityHelp");
+const settingsLanguageLabel = document.getElementById("settingsLanguageLabel");
+const settingsLanguageHelp = document.getElementById("settingsLanguageHelp");
+const settingsTitle = document.getElementById("settingsTitle");
+const ritualGeneralLabel = document.getElementById("ritualGeneralLabel");
+const ritualRecordLabel = document.getElementById("ritualRecordLabel");
+const ritualWorkoutLabel = document.getElementById("ritualWorkoutLabel");
+const ritualProjectLabel = document.getElementById("ritualProjectLabel");
 
 // Ritual emoji snippets (from assets/animated-emojis.txt)
 const ritualEmojis = {
@@ -50,17 +78,182 @@ const ritualEmojis = {
 };
 
 let events = {};
-let modalState = { mode: "create", id: null, dateKey: null, endDateKey: null, allDay: false };
+let settings = {
+  showHolidays: true,
+  holidayPriority: true,
+  language: "en"
+};
+let modalState = { mode: "create", id: null, dateKey: null, endDateKey: null, allDay: false, deleteTitle: null };
 let ritualState = { dateKey: null };
 let contextMenuState = { dateKey: null };
-
-const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const state = {
   current: new Date(),
   selected: null,
   selectedKey: null
 };
+
+const i18n = {
+  en: {
+    weekdayNames: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    weekdayLocal: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    sidebarTitle: "Events",
+    groupHoliday: "Holidays",
+    groupRitual: "Ritual",
+    groupGeneral: "Selected day",
+    today: "Today",
+    eventsLabel: "events",
+    ritualPicker: (dateKey, weekday) => `${dateKey} (${weekday}) add an event`,
+    ritualWeekday: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    monthLocale: "en-US",
+    reminderSuffix: " min before",
+    defaultEvent: "this event",
+    ritualTooltip: (emoji) => `${emoji} ritual`,
+    sync: "Sync",
+    settingsTitle: "Settings",
+    modal: {
+      add: "Add Event",
+      edit: "Edit Event",
+      title: "Title",
+      start: "Start",
+      end: "End",
+      allDay: "All day",
+      location: "Location",
+      reminder: "Reminder (minutes)",
+      placeholderTitle: "Enter a title",
+      placeholderTime: "e.g. 08:00",
+      placeholderEndTime: "e.g. 09:00",
+      placeholderLocation: "Enter a location",
+      placeholderReminder: "e.g. 30 (minutes before)",
+      cancel: "Cancel",
+      save: "Save"
+    },
+    deleteModal: {
+      title: "Delete Event",
+      cancel: "Cancel",
+      confirm: "Delete"
+    },
+    ritual: {
+      title: "Pick an event to add",
+      general: "General",
+      record: "Record",
+      workout: "Workout",
+      project: "Project",
+      dateText: (dateKey, weekday) => `${dateKey} (${weekday}) add an event`
+    },
+    context: {
+      clearGeneral: "Clear general events",
+      clearRitual: "Clear ritual events",
+      clearAll: "Clear all events",
+      label: (dateKey) => `${dateKey} · actions`
+    },
+    settings: {
+      holidayLabel: "Show holidays",
+      holidayHelp: "Show Google holidays on the calendar.",
+      priorityLabel: "Holiday priority",
+      priorityHelp: "Show holiday title first when mixed with general events.",
+      languageLabel: "Language",
+      languageHelp: "Switch calendar language."
+    }
+  },
+  ko: {
+    weekdayNames: ["일", "월", "화", "수", "목", "금", "토"],
+    weekdayLocal: ["일", "월", "화", "수", "목", "금", "토"],
+    sidebarTitle: "일정",
+    groupHoliday: "공휴일",
+    groupRitual: "Ritual",
+    groupGeneral: "선택한 날",
+    today: "오늘",
+    eventsLabel: "개",
+    ritualPicker: (dateKey, weekday) => `${dateKey}(${weekday}) 에 일정을 추가합니다.`,
+    ritualWeekday: ["일", "월", "화", "수", "목", "금", "토"],
+    monthLocale: "ko-KR",
+    reminderSuffix: "분 전",
+    defaultEvent: "이 일정",
+    ritualTooltip: (emoji) => `${emoji} 리추얼`,
+    sync: "동기화",
+    settingsTitle: "설정",
+    modal: {
+      add: "일정 추가",
+      edit: "일정 수정",
+      title: "제목",
+      start: "시작",
+      end: "종료",
+      allDay: "하루종일",
+      location: "위치",
+      reminder: "알림 (분)",
+      placeholderTitle: "제목을 입력하세요",
+      placeholderTime: "예: 08:00",
+      placeholderEndTime: "예: 09:00",
+      placeholderLocation: "장소를 입력하세요",
+      placeholderReminder: "예: 30 (분 전)",
+      cancel: "취소",
+      save: "저장"
+    },
+    deleteModal: {
+      title: "일정 삭제",
+      cancel: "취소",
+      confirm: "삭제"
+    },
+    ritual: {
+      title: "추가할 일정을 선택하세요",
+      general: "일반 일정",
+      record: "Record",
+      workout: "Workout",
+      project: "Project",
+      dateText: (dateKey, weekday) => `${dateKey}(${weekday}) 에 일정을 추가합니다.`
+    },
+    context: {
+      clearGeneral: "일반 일정 지우기",
+      clearRitual: "리추얼 일정 지우기",
+      clearAll: "모든 일정 지우기",
+      label: (dateKey) => `${dateKey} 일정 정리`
+    },
+    settings: {
+      holidayLabel: "공휴일 표시",
+      holidayHelp: "Google 공휴일을 달력에 노출합니다.",
+      priorityLabel: "공휴일 우선 표시",
+      priorityHelp: "공휴일과 일반일정이 같이 있을 때 공휴일 제목을 우선 보여줍니다.",
+      languageLabel: "언어 / Language",
+      languageHelp: "캘린더 표기를 영어/한국어로 전환합니다."
+    }
+  }
+};
+
+function t() {
+  return i18n[settings.language] || i18n.en;
+}
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem("ritualCalendar.settings");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      settings = { ...settings, ...parsed };
+    }
+  } catch {
+    // ignore parse errors
+  }
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem("ritualCalendar.settings", JSON.stringify(settings));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function syncSettingsUI() {
+  if (toggleHoliday) toggleHoliday.checked = !!settings.showHolidays;
+  if (toggleHolidayPriority) toggleHolidayPriority.checked = !!settings.holidayPriority;
+}
+
+function getVisibleEvents(key) {
+  const list = events[key] || [];
+  if (!settings.showHolidays) return list.filter(e => !e.isHoliday);
+  return list;
+}
 
 function getRitualEmoji(title) {
   if (!title) return null;
@@ -86,8 +279,9 @@ function parseDateKey(key) {
 
 function formatDateLabel(key) {
   const d = parseDateKey(key);
-  const weekdayNamesLocal = ["일", "월", "화", "수", "목", "금", "토"];
-  return `${key}(${weekdayNamesLocal[d.getDay()]})`;
+  const strings = t();
+  const weekday = strings.weekdayLocal[d.getDay()];
+  return `${key}(${weekday})`;
 }
 
 function buildRange(evt, startKey) {
@@ -95,11 +289,13 @@ function buildRange(evt, startKey) {
   const isAllDay = !!evt.allDay;
   const startLabel = formatDateLabel(startKey);
   const endLabel = formatDateLabel(endKey);
+  const strings = t();
+  const allDayLabel = strings.modal.allDay;
   if (isAllDay) {
-    if (startKey === endKey) return `${startLabel} · 하루종일`;
-    return `${startLabel} → ${endLabel} · 하루종일`;
+    if (startKey === endKey) return `${startLabel} · ${allDayLabel}`;
+    return `${startLabel} → ${endLabel} · ${allDayLabel}`;
   }
-  const startTime = evt.startTime || evt.time || "All day";
+  const startTime = evt.startTime || evt.time || allDayLabel;
   const endTime = evt.endTime || startTime;
   if (startKey === endKey) return `${startLabel} · ${startTime} - ${endTime}`;
   return `${startLabel} ${startTime} → ${endLabel} ${endTime}`;
@@ -118,7 +314,8 @@ function setDateValue(input, key) {
 function openEventModal({ mode, id = null, title = "", time = "", endTime = "", dateKey, endDateKey = null, allDay = false, location = "", reminderMinutes = "" }) {
   const todayKey = formatDateKey(new Date());
   modalState = { mode, id, dateKey: dateKey || todayKey, endDateKey: endDateKey || dateKey || todayKey, allDay };
-  modalTitleEl.textContent = mode === "create" ? "일정 추가" : "일정 수정";
+  const strings = t();
+  modalTitleEl.textContent = mode === "create" ? strings.modal.add : strings.modal.edit;
   const startKey = dateKey || todayKey;
   const endKey = endDateKey || startKey;
   inputEventId.value = id || "";
@@ -138,8 +335,11 @@ function openEventModal({ mode, id = null, title = "", time = "", endTime = "", 
 }
 
 function openDeleteModal({ id, title }) {
-  modalState = { mode: "delete", id };
-  deleteText.textContent = `"${title}" 일정을 삭제할까요?`;
+  modalState = { mode: "delete", id, deleteTitle: title };
+  const strings = t();
+  deleteText.textContent = settings.language === "ko"
+    ? `"${title}" 일정을 삭제할까요?`
+    : `Delete "${title}"?`;
   modalEvent.classList.add("hidden");
   modalDelete.classList.remove("hidden");
   modalBackdrop.classList.remove("hidden");
@@ -160,7 +360,8 @@ function toggleTimeInputs() {
 }
 
 function renderWeekdays() {
-  weekdayRow.innerHTML = weekdayNames
+  const strings = t();
+  weekdayRow.innerHTML = strings.weekdayNames
     .map(name => `<div class="weekday">${name}</div>`)
     .join("");
 }
@@ -169,19 +370,21 @@ let actionMenuId = 0;
 
 function createEventRow(evt, dateKey) {
   const row = document.createElement("div");
-  row.className = "event";
+  row.className = `event ${evt.isHoliday ? "event-holiday" : ""}`;
   const id = `menu-${actionMenuId++}`;
   const eventId = evt.id || `${dateKey}-${evt.title}-${evt.time}`;
   const range = buildRange(evt, dateKey);
+  const strings = t();
   const hasLocation = !!evt.location;
   const hasReminder = evt.reminderMinutes !== undefined && evt.reminderMinutes !== null && evt.reminderMinutes !== "";
+  const isHoliday = !!evt.isHoliday;
   row.innerHTML = `
     <div class="event-color" style="background:${evt.color}"></div>
-    <div class="event-main">
+      <div class="event-main">
       <div class="event-title">${evt.title}</div>
       <div class="event-time">${range}</div>
       ${hasLocation ? `<div class="event-meta"><img src="./assets/map-pin.png" class="icon" alt="" />${evt.location}</div>` : ""}
-      ${hasReminder ? `<div class="event-meta"><img src="./assets/bell.png" class="icon" alt="" />${evt.reminderMinutes}분 전</div>` : ""}
+      ${hasReminder ? `<div class="event-meta"><img src="./assets/bell.png" class="icon" alt="" />${evt.reminderMinutes}${strings.reminderSuffix}</div>` : ""}
     </div>
     <div class="event-actions">
       <button class="icon-btn ellipsis-btn" data-menu="${id}" aria-label="Actions">
@@ -257,7 +460,8 @@ function attachActionMenus() {
   document.querySelectorAll(".delete-btn").forEach(btn => {
     btn.onclick = () => {
       const id = btn.getAttribute("data-id");
-      const title = btn.closest(".event")?.querySelector(".event-title")?.textContent || "이 일정";
+      const strings = t();
+      const title = btn.closest(".event")?.querySelector(".event-title")?.textContent || strings.defaultEvent;
       openDeleteModal({ id, title });
     };
   });
@@ -265,8 +469,9 @@ function attachActionMenus() {
 
 function renderEventsSidebar(dateKey, viewDate) {
   eventList.innerHTML = "";
-  const todaysEvents = events[dateKey] || [];
-  sidebarTitle.textContent = "일정";
+  const todaysEvents = getVisibleEvents(dateKey);
+  const strings = t();
+  sidebarTitle.textContent = strings.sidebarTitle;
 
   const renderGroup = (label, items) => {
     if (!items.length) return;
@@ -282,7 +487,13 @@ function renderEventsSidebar(dateKey, viewDate) {
     });
   };
 
-  renderGroup("Selected day", todaysEvents);
+  const holidays = todaysEvents.filter(e => e.isHoliday);
+  const rituals = todaysEvents.filter(e => !e.isHoliday && getRitualEmoji(e.title));
+  const general = todaysEvents.filter(e => !e.isHoliday && !getRitualEmoji(e.title));
+
+  renderGroup(strings.groupHoliday, holidays);
+  renderGroup(strings.groupRitual, rituals);
+  renderGroup(strings.groupGeneral, general);
 
   attachActionMenus();
 }
@@ -297,7 +508,8 @@ function renderCalendar() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
   const todayKey = formatDateKey(new Date());
-  monthLabel.innerHTML = `${viewDate.toLocaleString("default", { month: "long" })}<span class="year">${year}</span>`;
+  const strings = t();
+  monthLabel.innerHTML = `${viewDate.toLocaleString(strings.monthLocale, { month: "long" })}<span class="year">${year}</span>`;
 
   const cells = [];
   for (let i = firstDay - 1; i >= 0; i--) {
@@ -319,12 +531,13 @@ function renderCalendar() {
   dayGrid.innerHTML = cells
     .map(cell => {
       const key = formatDateKey(cell.date);
-      const dayEvents = events[key] || [];
-      const ritualEvents = dayEvents.filter(evt => getRitualEmoji(evt.title));
-      const generalEvents = dayEvents.filter(evt => !getRitualEmoji(evt.title));
+      const dayEvents = getVisibleEvents(key);
+      const holidayEvents = dayEvents.filter(evt => evt.isHoliday);
+      const ritualEvents = dayEvents.filter(evt => !evt.isHoliday && getRitualEmoji(evt.title));
+      const generalEvents = dayEvents.filter(evt => !evt.isHoliday && !getRitualEmoji(evt.title));
       const isToday = key === todayKey;
       const isSelected = state.selected && formatDateKey(state.selected) === key;
-      const hasEvents = ritualEvents.length > 0 || generalEvents.length > 0;
+      const hasEvents = ritualEvents.length > 0 || generalEvents.length > 0 || holidayEvents.length > 0;
       const isFirst = cell.date.getDate() === 1;
       const ritualSet = new Set(ritualEvents.map(evt => getRitualEmoji(evt.title)?.emoji).filter(Boolean));
       const ritualCount = ritualSet.size;
@@ -339,14 +552,16 @@ function renderCalendar() {
       let badges = "";
       let generalLabelTop = "";
       let generalList = "";
-      if (generalEvents.length) {
-        const count = generalEvents.length;
+      const combinedGeneral = settings.holidayPriority ? [...holidayEvents, ...generalEvents] : [...generalEvents, ...holidayEvents];
+      const holidayFirst = settings.holidayPriority && holidayEvents.length > 0;
+      if (combinedGeneral.length) {
+        const count = combinedGeneral.length;
         if (count > 1) {
           const extra = count - 1;
-          generalLabelTop = `<span class="general-count" title="${count} events">+${extra}</span>`;
+          generalLabelTop = `<span class="general-count" title="${count} ${strings.eventsLabel}">+${extra}</span>`;
         }
-        const firstTitle = generalEvents[0].title || "Event";
-        generalList = `<div class="general-list" title="${firstTitle}">${firstTitle}</div>`;
+        const firstTitle = combinedGeneral[0].title || "Event";
+        generalList = `<div class="general-list ${holidayFirst ? "holiday" : ""}" title="${firstTitle}">${firstTitle}</div>`;
       } else {
         // Preserve vertical rhythm when no general events
         generalList = `<div class="general-list spacer"></div>`;
@@ -357,7 +572,8 @@ function renderCalendar() {
           .map(evt => {
             const ritual = getRitualEmoji(evt.title);
             if (ritual) {
-              return `<span class="emoji-badge" title="${ritual.emoji} 리추얼">${ritual.html}</span>`;
+              const strings = t();
+              return `<span class="emoji-badge" title="${strings.ritualTooltip(ritual.emoji)}">${ritual.html}</span>`;
             }
             return `<span class="dot"></span>`;
           })
@@ -449,9 +665,9 @@ function openRitualPicker(dateKey) {
   ritualState = { dateKey: dateKey || formatDateKey(new Date()) };
   if (ritualDateText) {
     const parsed = parseDateKey(ritualState.dateKey);
-    const weekdayNamesLocal = ["일", "월", "화", "수", "목", "금", "토"];
-    const weekday = weekdayNamesLocal[parsed.getDay()];
-    ritualDateText.textContent = `${ritualState.dateKey}(${weekday}) 에 일정을 추가합니다.`;
+    const strings = t();
+    const weekday = strings.ritualWeekday[parsed.getDay()];
+    ritualDateText.textContent = strings.ritual.dateText(ritualState.dateKey, weekday);
   }
   ritualBackdrop.classList.remove("hidden");
 }
@@ -464,7 +680,8 @@ function closeRitualPicker() {
 function openDayContextMenu(dateKey, x, y) {
   contextMenuState = { dateKey };
   if (!dayContextMenu) return;
-  if (contextDateLabel) contextDateLabel.textContent = `${dateKey} 일정 정리`;
+  const strings = t();
+  if (contextDateLabel) contextDateLabel.textContent = strings.context.label(dateKey);
   dayContextMenu.classList.remove("hidden");
 }
 
@@ -476,6 +693,7 @@ function closeDayContextMenu() {
 function deleteEventsForDate(dateKey, mode) {
   const list = events[dateKey] || [];
   const toDelete = list.filter(evt => {
+    if (evt.isHoliday) return false;
     const isRitual = !!getRitualEmoji(evt.title);
     if (mode === "general") return !isRitual;
     if (mode === "ritual") return isRitual;
@@ -532,6 +750,7 @@ window.chrome?.webview?.addEventListener("message", (event) => {
     const key = item.startDateKey || item.dateKey;
     if (!key) return;
     nextEvents[key] = nextEvents[key] || [];
+    const isHoliday = !!item.isHoliday;
     nextEvents[key].push({
       id: item.id || `${key}-${item.title}-${item.time}`,
       title: item.title || "Event",
@@ -542,6 +761,8 @@ window.chrome?.webview?.addEventListener("message", (event) => {
       allDay: item.allDay || false,
       location: item.location || "",
       reminderMinutes: item.reminderMinutes,
+      isHoliday,
+      calendarId: item.calendarId,
       color: "#22d3ee"
     });
   });
@@ -550,6 +771,56 @@ window.chrome?.webview?.addEventListener("message", (event) => {
   const selectedKey = state.selected ? formatDateKey(state.selected) : formatDateKey(new Date());
   renderEventsSidebar(selectedKey, state.current);
 });
+
+function applyLanguageTexts() {
+  const strings = t();
+  const todayButton = document.getElementById("todayBtn");
+  if (todayButton) todayButton.textContent = strings.today;
+  if (modalTitleEl) modalTitleEl.textContent = modalState.mode === "create" ? strings.modal.add : strings.modal.edit;
+  if (modalCancel) modalCancel.textContent = strings.modal.cancel;
+  if (modalSubmit) modalSubmit.textContent = strings.modal.save;
+  if (deleteTitleEl) deleteTitleEl.textContent = strings.deleteModal.title;
+  if (deleteCancel) deleteCancel.textContent = strings.deleteModal.cancel;
+  if (deleteConfirm) deleteConfirm.textContent = strings.deleteModal.confirm;
+  if (modalState.mode === "delete" && deleteText) {
+    const titleText = modalState.deleteTitle || modalState.id || "";
+    deleteText.textContent = settings.language === "ko"
+      ? `"${titleText}" 일정을 삭제할까요?`
+      : `Delete "${titleText}"?`;
+  }
+  if (lblTitle) lblTitle.textContent = strings.modal.title;
+  if (lblStart) lblStart.querySelector("span").textContent = strings.modal.start;
+  if (lblEnd) lblEnd.querySelector("span").textContent = strings.modal.end;
+  if (lblAllDay) lblAllDay.textContent = strings.modal.allDay;
+  if (lblLocation) lblLocation.querySelector("span").textContent = strings.modal.location;
+  if (lblReminder) lblReminder.querySelector("span").textContent = strings.modal.reminder;
+  if (inputTitle) inputTitle.placeholder = strings.modal.placeholderTitle;
+  if (inputTime) inputTime.placeholder = strings.modal.placeholderTime;
+  if (inputEndTime) inputEndTime.placeholder = strings.modal.placeholderEndTime;
+  if (inputLocation) inputLocation.placeholder = strings.modal.placeholderLocation;
+  if (inputReminder) inputReminder.placeholder = strings.modal.placeholderReminder;
+  if (ritualTitle) ritualTitle.textContent = strings.ritual.title;
+  if (ritualGeneralLabel) ritualGeneralLabel.textContent = strings.ritual.general;
+  if (ritualRecordLabel) ritualRecordLabel.textContent = strings.ritual.record;
+  if (ritualWorkoutLabel) ritualWorkoutLabel.textContent = strings.ritual.workout;
+  if (ritualProjectLabel) ritualProjectLabel.textContent = strings.ritual.project;
+  if (ctxClearGeneral) ctxClearGeneral.textContent = strings.context.clearGeneral;
+  if (ctxClearRitual) ctxClearRitual.textContent = strings.context.clearRitual;
+  if (ctxClearAll) ctxClearAll.textContent = strings.context.clearAll;
+  if (settingsTitle) settingsTitle.textContent = strings.settingsTitle;
+  if (settingsHolidayLabel) settingsHolidayLabel.textContent = strings.settings.holidayLabel;
+  if (settingsHolidayHelp) settingsHolidayHelp.textContent = strings.settings.holidayHelp;
+  if (settingsPriorityLabel) settingsPriorityLabel.textContent = strings.settings.priorityLabel;
+  if (settingsPriorityHelp) settingsPriorityHelp.textContent = strings.settings.priorityHelp;
+  if (settingsLanguageLabel) settingsLanguageLabel.textContent = strings.settings.languageLabel;
+  if (settingsLanguageHelp) settingsLanguageHelp.textContent = strings.settings.languageHelp;
+  if (languageSelect && languageSelect.options.length >= 2) {
+    languageSelect.options[0].textContent = settings.language === "ko" ? "영어" : "English";
+    languageSelect.options[1].textContent = settings.language === "ko" ? "한국어" : "Korean";
+  }
+  if (syncBtn) syncBtn.title = strings.sync;
+  if (document.getElementById("menuBtn")) document.getElementById("menuBtn").title = strings.settings.languageHelp;
+}
 
 modalCancel.addEventListener("click", closeModal);
 modalClose.addEventListener("click", closeModal);
@@ -594,6 +865,56 @@ document.addEventListener("keydown", (e) => {
 
 if (contextClose) {
   contextClose.addEventListener("click", closeDayContextMenu);
+}
+
+function openSettings() {
+  settingsBackdrop?.classList.remove("hidden");
+}
+
+function closeSettings() {
+  settingsBackdrop?.classList.add("hidden");
+}
+
+if (menuBtn) {
+  menuBtn.addEventListener("click", () => {
+    syncSettingsUI();
+    openSettings();
+  });
+}
+if (settingsClose) settingsClose.addEventListener("click", closeSettings);
+  if (settingsBackdrop) {
+    settingsBackdrop.addEventListener("click", (e) => {
+      if (e.target === settingsBackdrop) closeSettings();
+    });
+  }
+if (toggleHoliday) {
+  toggleHoliday.addEventListener("change", () => {
+    settings.showHolidays = toggleHoliday.checked;
+    saveSettings();
+    renderCalendar();
+    const selectedKey = state.selected ? formatDateKey(state.selected) : formatDateKey(new Date());
+    renderEventsSidebar(selectedKey, state.current);
+  });
+}
+if (toggleHolidayPriority) {
+  toggleHolidayPriority.addEventListener("change", () => {
+    settings.holidayPriority = toggleHolidayPriority.checked;
+    saveSettings();
+    renderCalendar();
+    const selectedKey = state.selected ? formatDateKey(state.selected) : formatDateKey(new Date());
+    renderEventsSidebar(selectedKey, state.current);
+  });
+}
+if (languageSelect) {
+  languageSelect.addEventListener("change", () => {
+    settings.language = languageSelect.value || "en";
+    saveSettings();
+    applyLanguageTexts();
+    renderWeekdays();
+    renderCalendar();
+    const selectedKey = state.selected ? formatDateKey(state.selected) : formatDateKey(new Date());
+    renderEventsSidebar(selectedKey, state.current);
+  });
 }
 
 modalForm.addEventListener("submit", (e) => {
@@ -642,5 +963,8 @@ deleteConfirm.addEventListener("click", () => {
   closeModal();
 });
 
+loadSettings();
+syncSettingsUI();
+applyLanguageTexts();
 renderWeekdays();
 renderCalendar();
